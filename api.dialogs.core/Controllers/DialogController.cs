@@ -9,34 +9,18 @@ namespace api.dialogs.core.Controllers
     [ApiController]
     public class DialogController : ControllerBase
     {
-        private readonly RGDialogsClients _dialogsClients;
+        private readonly DataTreatment _dataTreatment;
 
-        public DialogController(RGDialogsClients dialogsClients)
+        public DialogController(DataTreatment dataTreatment)
         {
-            _dialogsClients = dialogsClients;
+            _dataTreatment = dataTreatment;
         }
-        [HttpPost]
-        public async Task<IActionResult> GetDialog(List<Guid> guids)
-        {
-            var dialog = await _dialogsClients.Init();
-            var DialogIdList = new List<string>();
-            var dialogId = String.Empty;
-            foreach (var guid in guids)
-            {
-                var findDialog = dialog.FirstOrDefault(x => x.IDClient == guid);
-                if (findDialog == null)
-                    return BadRequest(new Guid { });
-                DialogIdList.Add(findDialog.IDRGDialog.ToString());
-            }
-            foreach (var item in DialogIdList)
-            {
-                if (!item.ToString().Equals(DialogIdList.First().ToString()))
-                    return BadRequest(new Guid { });
-                else
-                    dialogId = DialogIdList.First();
-            }
 
-            return Ok("DialogId => " + dialogId);
+        [HttpPost]
+        public async Task<IActionResult> DialogCheckout(List<Guid> guids)
+        {
+            var data = await _dataTreatment.GetDialog(guids);
+            return data.StatusCode == System.Net.HttpStatusCode.OK ? Ok(data) : BadRequest(data);
         }
     }
 }
